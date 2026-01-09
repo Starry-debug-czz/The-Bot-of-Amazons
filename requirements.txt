@@ -1,0 +1,2 @@
+# ZZmazon has no external dependencies
+# Python 3.7+ standard library only
