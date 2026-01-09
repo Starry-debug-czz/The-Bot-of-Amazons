@@ -2,7 +2,10 @@
 """Test script for ZZmazon to verify basic functionality."""
 
 import sys
-sys.path.insert(0, '/home/runner/work/The-Bot-of-Amazons/The-Bot-of-Amazons')
+import os
+
+# Add parent directory to path to import zzmazon
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from zzmazon import AmazonsGame, SimpleAI
 

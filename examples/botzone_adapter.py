@@ -16,7 +16,7 @@ def parse_botzone_input():
     try:
         data = json.loads(input())
         return data
-    except:
+    except (json.JSONDecodeError, ValueError) as e:
         return None
 
 
