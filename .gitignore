@@ -1,0 +1,24 @@
+# macOS
+.DS_Store
+*.dSYM/
+
+# CMake and compiler output
+/build/
+/cmake-build-*/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.o
+*.obj
+*.exe
+
+# Runtime data
+save.txt
+
+# Local document containing personal information
+/docs/course-report.pdf
+
+# Python
+__pycache__/
+*.py[cod]

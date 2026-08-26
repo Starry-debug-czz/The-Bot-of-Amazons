@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/cli_plus">
+        <file alias="theme.qss">theme.qss</file>
+        <file alias="chevron-down.svg">chevron-down.svg</file>
+    </qresource>
+</RCC>
