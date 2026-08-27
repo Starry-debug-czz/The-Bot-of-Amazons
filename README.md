@@ -8,22 +8,22 @@
 
 | 程序 | 入口 | 用途 |
 | --- | --- | --- |
-| **ZZmazon Studio** | `src/zzmazon_cli_plus.cpp` | 推荐使用。Qt 6 图形客户端，支持鼠标操作、两阶段轨迹高亮、自然落子动画、人机/双人模式、悔棋与提示。 |
+| **ZZmazon Studio** | `src/zzmazon_cli_plus.cpp` | 推荐使用。Qt 6 图形客户端，支持鼠标操作、两阶段整格高亮、水墨分块棋盘、自然落子动画与音效、人机/双人模式、悔棋与提示。 |
 | **终端交互版** | `src/zzmazon_cli.cpp` | 纯终端体验，支持人机对战、双人对战、难度调整、局势显示、存档和复盘。 |
 | **Botzone 版** | `src/zzmazon_botzone.cpp` | 无项目内依赖的单文件程序，读取 Botzone 历史走法并输出最佳落子。 |
 
 ## 图形增强版
 
-ZZmazon Studio 使用原生 Qt Widgets 和 `QPainter` 矢量绘制，不依赖浏览器或图片棋子素材，并支持高 DPI 缩放。
+ZZmazon Studio 使用原生 Qt Widgets 和 `QPainter` 矢量绘制，不依赖浏览器或图片棋子素材，并支持高 DPI 缩放。界面为浅色宣纸水墨风：分块悬浮的瓷砖棋盘、纸纹背景与墨晕细节。
 
 一次完整落子严格分成两个阶段：
 
-1. **移动棋子**：点击己方棋子后，以青色光轨展示全部合法终点；悬浮终点会预览棋子位置。点击终点后，棋子抬升、移动并自然落下。
-2. **发射障碍**：棋子落稳后，才以珊瑚色光轨展示合法箭点；点击箭点后，箭沿轨迹飞行并落成障碍。
+1. **移动棋子**：点击己方棋子后，合法终点以青绿色整格高亮标出；悬停的格子会轻微浮起，棋子先在原位轻轻悬浮。点击终点后，棋子才真正滑行落定。
+2. **发射障碍**：棋子落稳后，才以朱砂色整格高亮展示合法箭点；确认后箭破空飞行，中靶处凝成障碍印。
 
 | 第一步：移动棋子 | 第二步：发射障碍 |
 | --- | --- |
-| ![棋子移动轨迹](docs/assets/cli-plus/selection-paths.png) | ![障碍发射轨迹](docs/assets/cli-plus/arrow-paths.png) |
+| ![青绿整格高亮的移动阶段](docs/assets/cli-plus/selection-paths.png) | ![朱砂整格高亮的射箭阶段](docs/assets/cli-plus/arrow-paths.png) |
 
 其他功能包括：
 
@@ -31,6 +31,7 @@ ZZmazon Studio 使用原生 Qt Widgets 和 `QPainter` 矢量绘制，不依赖�
 - 自由选择执黑或执白；
 - 350 / 800 / 1500 ms 三档 AI 思考时间；
 - 异步 AI 搜索，窗口和动画不会被阻塞；
+- 落子、射箭音效与带印章动画的终局结算卡片；
 - 新对局、成对悔棋、AI 路线提示和走子记录；
 - `Ctrl+N` 新对局、`Ctrl+Z` 悔棋、`Esc`/右键取消选择。
 
@@ -57,11 +58,11 @@ ZZmazon Studio 使用原生 Qt Widgets 和 `QPainter` 矢量绘制，不依赖�
 │   │   ├── amazons_game.*        # 规则、状态、悔棋与异步 AI
 │   │   ├── board_widget.*        # 棋盘、两阶段交互与动画
 │   │   ├── main_window.*         # 模式、侧栏与对局流程
-│   │   └── theme.qss             # 深色界面主题
+│   │   └── theme.qss             # 浅色宣纸水墨主题
 │   ├── zzmazon_cli.cpp           # 终端交互版
 │   └── zzmazon_botzone.cpp       # Botzone 单文件版
 ├── tests/                        # 增强版规则和 GUI 交互测试
-├── experiments/self_play/        # 历史候选版本与并行对弈脚本
+├── experiments/self_play/        # 自对弈快照与并行对弈裁判
 └── docs/                         # 客户端说明、课程报告与截图
 ```
 
@@ -130,8 +131,8 @@ cmake -S . -B build \
 cmake --build build --parallel
 
 python3 experiments/self_play/judge.py \
-  --bot-a build/bin/original \
-  --bot-b build/bin/t1 \
+  --bot-a build/bin/baseline \
+  --bot-b build/bin/prototype_nofree \
   --rounds 20
 ```
 

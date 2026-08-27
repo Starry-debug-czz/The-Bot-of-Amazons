@@ -2,6 +2,11 @@
 #pragma GCC target("avx2,bmi,bmi2,lzcnt,popcnt")
 #pragma GCC optimize("Ofast")
 
+// ── 自对弈快照 · prototype_tuned ───────────────────────────────────
+// 原型扫参版(原名 t2.cpp):在 prototype 基础上仅调三行参数——
+// 思考时间 997→965、抖动范围 AD2 0.01→0.02、探索常数下界 0.16→0.20,
+// 用以检验公式版的参数容错。血缘与参数对照见同目录 README.md。
+
 #include <iostream>
 #include <vector>
 #include <cmath>
@@ -330,7 +335,7 @@ double evaluatePosition(int targetPlayer) {
     };
     score_supermob=supermobB-supermobW;
 
-    double value=w_params[0]*score_qt + w_params[1]*score_kt + w_params[2]*score_qp + w_params[3]*score_kp + w_params[4]*score_mob*ADJUST1+ w_params[5]*score_supermob*ADJUST2;
+    double value=w_params[0]*score_qt + w_params[1]*score_kt + w_params[2]*score_qp + w_params[3]*score_kp + w_params[4]*score_mob*ADJUST1+ w_params[4]*score_supermob*ADJUST2;
 
     double probBlack = 1.0 / (1.0 + exp(-value * 0.2));
     return (targetPlayer == BLACK) ? probBlack : (1.0 - probBlack);
@@ -352,43 +357,9 @@ struct UCTNode {
     ~UCTNode() { for(auto c : children) delete c; }
 };
 
-
-// 基于拟合点 (0,0.3), (7,0.4), (14,0.5), (20,0.3), (28,0.1) 计算
-// 逻辑特征：升得慢，中局峰值稳健，残局快速收敛
-const double DYNAMIC_C_TABLE[28] = {
-    0.3000000000, // turn 0
-    0.3127055013, // turn 1
-    0.3255403061, // turn 2
-    0.3384950481, // turn 3
-    0.3515582318, // turn 4
-    0.3647152014, // turn 5
-    0.3779471322, // turn 6
-    0.3912300000, // turn 7 (拟合点: 0.4 略偏下，受全局平滑影响)
-    0.4045334707, // turn 8
-    0.4178187814, // turn 9
-    0.4310398293, // turn 10
-    0.4441430932, // turn 11
-    0.4570676011, // turn 12
-    0.4697449241, // turn 13
-    0.4821001000, // turn 14 (拟合点: 0.5 略偏下，多项式震荡抑制)
-    0.4940506013, // turn 15
-    0.5055050218, // turn 16
-    0.5163529329, // turn 17
-    0.5264645224, // turn 18
-    0.5356889753, // turn 19
-    0.5438531000, // turn 20 (拟合点: 0.3 这里函数表现出平滑过渡)
-    0.5113000214, // turn 21 (开始快速下降)
-    0.4705001241, // turn 22
-    0.4212154312, // turn 23
-    0.3632112451, // turn 24
-    0.2962551412, // turn 25
-    0.2201112451, // turn 26
-    0.2245512412, // turn 27
-};
-
-
 double getDynamicC(int turn) {
-    return 0.5*DYNAMIC_C_TABLE[turn]; 
+    double C = 0.177 * exp(-0.008 * (turn - 1.41));
+    return max(0.2, min(0.35, C));  //待定
 }
 
 double computeUCT(UCTNode* node, double C,bool isMaxLayer) {
@@ -420,9 +391,8 @@ int getPruningCount(long timeLeftMs, int totalMoves, int totalvisits=0) {
     }
 
     // 关键改进！！！！！ 随着模拟次数增加，更进一步压缩，强迫算力向深层渗透
-    if (totalvisits > 600) limit = min(limit, 12);
-    if (totalvisits > 800) limit = min(limit, 10);
-    if (totalvisits > 1200) limit = min(limit, 8);
+    if (totalvisits > 800) limit = min(limit, 8);
+    if (totalvisits > 12000) limit = min(limit, 4);
 
     return max(1, min(limit, totalMoves));
 }
@@ -547,7 +517,7 @@ Move getMCTSMove() {
         
                 int sampleSize = moves.size();
                 if (node != root) {
-                    sampleSize = std::min((int)moves.size(), 400); // 深层节点采样200就够了
+                    sampleSize = std::min((int)moves.size(), 200); // 深层节点采样200就够了
                     std::shuffle(moves.begin(), moves.end(), g_rng);
                 }
                 // 如果是根节点(node == root)，保持 sampleSize 为 moves.size()，评估所有走法

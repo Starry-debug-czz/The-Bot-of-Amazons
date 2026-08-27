@@ -14,6 +14,7 @@
 class QKeyEvent;
 class QMouseEvent;
 class QPainter;
+class QPixmap;
 
 namespace zzmazon {
 
@@ -66,10 +67,16 @@ private:
         Move move;
         int player = Empty;
         int durationMs = 920;
+        // 音效节点只触发一次的标记
+        bool soundPlace = false;
+        bool soundArrow = false;
+        bool soundImpact = false;
     };
 
     [[nodiscard]] QRectF boardRect() const;
     [[nodiscard]] QRectF cellRect(Coord coord) const;
+    [[nodiscard]] QRectF tileRect(Coord coord) const;
+    [[nodiscard]] qreal hoverLift(Coord coord) const;
     [[nodiscard]] QPointF cellCenter(Coord coord) const;
     [[nodiscard]] Coord coordAt(QPointF position) const;
     [[nodiscard]] bool isValidTarget(Coord coord) const;
@@ -79,7 +86,6 @@ private:
     void selectPiece(Coord coord);
     void chooseDestination(Coord coord);
     void chooseArrow(Coord coord);
-    void updateCursorFor(Coord coord);
     void updateAnimation();
 
     void drawBackdrop(QPainter& painter) const;
@@ -107,6 +113,10 @@ private:
         qreal opacity = 1.0
     ) const;
 
+    [[nodiscard]] QColor brushTargetColor() const;
+    void syncIdleMotion();
+    void ensurePaperTexture() const;
+
     const AmazonsGame* game_ = nullptr;
     bool inputEnabled_ = false;
     SelectionPhase phase_ = SelectionPhase::Piece;
@@ -115,6 +125,12 @@ private:
     Coord hovered_;
     std::vector<Coord> validTargets_;
     std::optional<Move> hintMove_;
+
+    mutable QPixmap paperTexture_;
+    mutable QSize paperTextureSize_;
+    QElapsedTimer shimmerClock_;
+    QElapsedTimer hoverClock_;
+    QTimer idleTimer_;
 
     AnimationState animation_;
     QElapsedTimer animationClock_;

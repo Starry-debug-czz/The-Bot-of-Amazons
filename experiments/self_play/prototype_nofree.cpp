@@ -2,6 +2,13 @@
 #pragma GCC target("avx2,bmi,bmi2,lzcnt,popcnt")
 #pragma GCC optimize("Ofast")
 
+// ── 自对弈快照 · prototype_nofree ──────────────────────────────────
+// 内存策略实验(原名 test.cpp):在公式版基础上注释掉 UCTNode 析构与
+// delete root。Botzone 每回合新起进程,不释放内存并无危害,反而省去
+// 释放开销;本地长时间对局则不宜此配置。本文件是线上版最近的祖先,
+// 与 src/zzmazon_botzone.cpp 仅差 7 行(上线时 C 固定为 0.2、深层采样 350)。
+// 血缘与参数对照见同目录 README.md。
+
 #include <iostream>
 #include <vector>
 #include <cmath>
@@ -212,7 +219,7 @@ FORCE_INLINE bool getFastRandomMove(int color, Move& m) {
 
 // ==================== 评估系统 ====================
 const double ADJUST1=1.6,ADJUST2=0.2-0.2*(2-myColor); // 小孩子才做选择题——我选择直接调整评估函数输出范围来影响搜索树选择性
-const double AD1=0.99,AD2=0.01; //评估函数参数微调范围
+const double AD1=0.99,AD2=0.02; //评估函数参数微调范围
 bool ON=false; //是否启用超级修正
 
 int compute_game_stage() {
@@ -349,12 +356,12 @@ struct UCTNode {
 
     UCTNode(Move m, int pColor, UCTNode* par) 
         : move(m), playerToMove(pColor), parent(par), visits(0), total_value(0.0), is_expanded(false) {}
-    ~UCTNode() { for(auto c : children) delete c; }
+    //~UCTNode() { for(auto c : children) delete c; }
 };
 
 double getDynamicC(int turn) {
     double C = 0.177 * exp(-0.008 * (turn - 1.41));
-    return max(0.16, min(0.35, C));  //待定
+    return max(0.2, min(0.35, C));  //待定
 }
 
 double computeUCT(UCTNode* node, double C,bool isMaxLayer) {
@@ -562,7 +569,7 @@ Move getMCTSMove() {
 
     //  混合策略
     Move bestMove = selectBestMove(root);
-    delete root;
+    //delete root;
     return bestMove;
 }
 

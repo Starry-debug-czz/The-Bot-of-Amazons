@@ -103,7 +103,7 @@ endif()
 option(ZZMAZON_BUILD_EXPERIMENTS "Build historical self-play variants" OFF)
 
 if(ZZMAZON_BUILD_EXPERIMENTS)
-    foreach(variant IN ITEMS original t1 t2 test)
+    foreach(variant IN ITEMS baseline prototype prototype_tuned prototype_nofree)
         add_zzmazon_executable(
             selfplay_${variant}
             experiments/self_play/${variant}.cpp

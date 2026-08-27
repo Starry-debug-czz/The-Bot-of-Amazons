@@ -1,203 +1,214 @@
+/* ── ZZmazon · 水墨宣纸主题 ─────────────────────────────── */
+
 * {
-    font-family: "Helvetica Neue", "PingFang SC", "Noto Sans CJK SC", sans-serif;
-    color: #eaf1fb;
+    font-family: "Kaiti SC", "STKaiti", "KaiTi", "Kaiti TC",
+                 "Songti SC", "Noto Serif CJK SC", "PingFang SC", sans-serif;
+    color: #3a352c;
 }
 
 QMainWindow,
 QWidget#appRoot {
-    background: #091321;
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+        stop:0 #f2e9d4, stop:1 #e7dcc0);
 }
 
 QFrame#playArea,
 QFrame#sidebar {
-    background: #101c2e;
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    border-radius: 22px;
+    background: rgba(250, 244, 229, 0.72);
+    border: 1px solid #cfc09f;
+    border-radius: 20px;
 }
 
 QLabel#eyebrow {
-    color: #43d9c2;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 2px;
+    color: #a04f2c;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 3px;
 }
 
 QLabel#brandTitle {
-    color: #f7fbff;
-    font-size: 25px;
-    font-weight: 750;
+    color: #2e2921;
+    font-size: 24px;
+    font-weight: 700;
 }
 
 QLabel#turnBadge {
     min-height: 40px;
-    padding: 0 16px;
+    padding: 0 18px;
     border-radius: 20px;
-    font-size: 12px;
-    font-weight: 800;
+    font-size: 13px;
+    font-weight: 700;
     letter-spacing: 1px;
 }
 
 QLabel#turnBadge[side="black"] {
-    color: #b8fff4;
-    background: rgba(67, 217, 194, 0.12);
-    border: 1px solid rgba(67, 217, 194, 0.34);
+    color: #f0e6ce;
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+        stop:0 #4a4238, stop:1 #2c2721);
+    border: 1px solid #1b1712;
 }
 
 QLabel#turnBadge[side="white"] {
-    color: #fff2cf;
-    background: rgba(255, 211, 106, 0.11);
-    border: 1px solid rgba(255, 211, 106, 0.30);
+    color: #46402f;
+    background: #fbf5e6;
+    border: 1px solid #cdbd97;
 }
 
 QFrame#statusCard {
-    background: #17263b;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
+    background: #f8f0dd;
+    border: 1px solid #dbcda9;
+    border-radius: 15px;
 }
 
 QLabel#statusTitle {
-    color: #ffffff;
-    font-size: 19px;
-    font-weight: 750;
+    color: #262019;
+    font-size: 18px;
+    font-weight: 650;
 }
 
 QLabel#statusDetail {
-    color: #9db0c9;
+    color: #7b6c51;
     font-size: 12px;
-    line-height: 1.35;
 }
 
 QLabel#phasePill {
-    color: #74ead9;
-    background: rgba(67, 217, 194, 0.09);
-    border: 1px solid rgba(67, 217, 194, 0.22);
-    border-radius: 9px;
-    min-height: 30px;
-    padding: 0 8px;
-    font-size: 11px;
-    font-weight: 700;
+    color: #993a22;
+    background: rgba(153, 58, 34, 0.08);
+    border: 1px solid rgba(153, 58, 34, 0.35);
+    border-radius: 10px;
+    min-height: 28px;
+    padding: 0 10px;
+    font-size: 12px;
+    font-weight: 600;
 }
 
 QLabel#sectionLabel {
-    color: #7187a4;
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 1px;
-    text-transform: uppercase;
+    color: #8b7a58;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
 }
 
 QLabel#counterLabel {
-    color: #43d9c2;
-    font-size: 10px;
-    font-weight: 800;
+    color: #993a22;
+    font-size: 11px;
+    font-weight: 700;
     letter-spacing: 1px;
 }
 
 QComboBox {
-    min-height: 39px;
-    padding: 0 13px;
-    background: #17263b;
-    border: 1px solid rgba(255, 255, 255, 0.09);
-    border-radius: 10px;
-    color: #dbe7f5;
+    min-height: 37px;
+    padding: 0 12px;
+    background: #f7efdc;
+    border: 1px solid #cfc19f;
+    border-radius: 9px;
+    color: #3a352c;
     font-size: 12px;
 }
 
 QComboBox:hover,
 QComboBox:focus {
-    border-color: rgba(67, 217, 194, 0.55);
-    background: #1a2c44;
+    border-color: #a04f2c;
+    background: #faf3e1;
 }
 
 QComboBox:disabled {
-    color: #53657d;
-    background: #111d2e;
+    color: #b3a583;
+    background: #efe6cf;
+    border-color: #d8cbab;
 }
 
 QComboBox::drop-down {
     border: 0;
-    width: 28px;
+    width: 26px;
 }
 
 QComboBox::down-arrow {
     image: url(:/cli_plus/chevron-down.svg);
     width: 12px;
     height: 8px;
-    margin-right: 10px;
+    margin-right: 9px;
 }
 
 QComboBox QAbstractItemView {
-    color: #eaf1fb;
-    background: #17263b;
-    selection-background-color: #255168;
-    border: 1px solid #30435c;
+    color: #3a352c;
+    background: #fbf4e2;
+    selection-background-color: #e9dab3;
+    selection-color: #2e2921;
+    border: 1px solid #cdbb92;
     outline: 0;
-    padding: 5px;
+    padding: 4px;
 }
 
 QPushButton {
-    min-height: 39px;
+    min-height: 37px;
     padding: 0 12px;
-    color: #b9c9dc;
-    background: #17263b;
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    border-radius: 10px;
+    color: #453d2e;
+    background: #f6eeda;
+    border: 1px solid #c9ba97;
+    border-radius: 9px;
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 QPushButton:hover {
-    color: #ffffff;
-    background: #213650;
-    border-color: rgba(255, 255, 255, 0.18);
+    color: #2e2921;
+    background: #f9f2df;
+    border-color: #a04f2c;
 }
 
 QPushButton:pressed {
-    background: #0f1c2d;
+    background: #ecdfc0;
 }
 
 QPushButton:disabled {
-    color: #4d5d72;
-    background: #111c2c;
-    border-color: rgba(255, 255, 255, 0.04);
+    color: #b7ab8e;
+    background: #efe7d2;
+    border-color: #ded2b4;
 }
 
 QPushButton#primaryButton {
-    color: #071a1b;
-    background: #43d9c2;
-    border: 1px solid #69ead7;
+    color: #f7ecd8;
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+        stop:0 #b04732, stop:1 #93331f);
+    border: 1px solid #7c2a18;
 }
 
 QPushButton#primaryButton:hover {
-    background: #63e6d2;
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+        stop:0 #c05439, stop:1 #a03c25);
+}
+
+QPushButton#primaryButton:pressed {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+        stop:0 #93331f, stop:1 #872d1a);
 }
 
 QListWidget#moveLog {
-    color: #9fb2ca;
-    background: #0c1727;
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 12px;
-    padding: 7px;
+    color: #6f6249;
+    background: #f2e9d1;
+    border: 1px solid #d9cbab;
+    border-radius: 11px;
+    padding: 6px;
     outline: 0;
-    font-family: "SF Mono", "JetBrains Mono", monospace;
-    font-size: 10px;
+    font-size: 11px;
 }
 
 QListWidget#moveLog::item {
-    min-height: 28px;
-    padding: 2px 5px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.035);
+    min-height: 26px;
+    padding: 2px 6px;
+    border-bottom: 1px solid #e5d9bd;
 }
 
 QScrollBar:vertical {
     width: 7px;
     background: transparent;
-    margin: 5px 1px;
+    margin: 4px 1px;
 }
 
 QScrollBar::handle:vertical {
     min-height: 24px;
-    background: #32445b;
+    background: #c6b48d;
     border-radius: 3px;
 }
 
@@ -207,15 +218,70 @@ QScrollBar::sub-line:vertical {
 }
 
 QLabel#helpText {
-    color: #60758f;
-    font-size: 10px;
-    line-height: 1.4;
+    color: #8d7d5f;
+    font-size: 11px;
 }
 
 QMessageBox {
-    background: #101c2e;
+    background: #f4ecd9;
 }
 
 QMessageBox QLabel {
-    color: #eaf1fb;
+    color: #3a352c;
+}
+
+/* ── 终局之契:胜利/失败卡片 ─────────────────────────────── */
+QFrame#gameOverCard {
+    background: qlineargradient(x1:0, y1:0, x2:0.35, y2:1,
+                stop:0 #f7f0dd, stop:0.55 #efe5cb, stop:1 #e5d7b4);
+    border: 1px solid #b9a67d;
+    border-radius: 18px;
+}
+
+QLabel#gameOverSeal {
+    background: qlineargradient(x1:0, y1:0, x2:0.3, y2:1,
+                stop:0 #c8502f, stop:0.55 #a63a20, stop:1 #87290f);
+    color: #f6ecd4;
+    border: 2px solid #7c2410;
+    border-radius: 56px;
+    font-size: 56px;
+    font-weight: 600;
+}
+
+QLabel#gameOverSeal[result="loss"] {
+    background: qlineargradient(x1:0, y1:0, x2:0.3, y2:1,
+                stop:0 #514839, stop:0.55 #3b3428, stop:1 #262119);
+    color: #e6dcc2;
+    border: 2px solid #17130d;
+}
+
+QLabel#gameOverTitle {
+    color: #33291c;
+    font-size: 26px;
+    font-weight: 600;
+    margin-top: 8px;
+}
+
+QLabel#gameOverSubtitle {
+    color: #a04f2c;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+QLabel#gameOverDetail {
+    color: #6f5f44;
+    font-size: 12px;
+}
+
+QFrame#gameOverDivider {
+    border: none;
+    max-height: 2px;
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                stop:0 rgba(166,84,44,0), stop:0.5 rgba(166,84,44,190),
+                stop:1 rgba(166,84,44,0));
+}
+
+#gameOverCard QPushButton {
+    min-height: 36px;
+    border-radius: 10px;
 }

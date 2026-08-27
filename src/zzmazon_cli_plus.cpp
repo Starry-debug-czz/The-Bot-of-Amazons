@@ -16,10 +16,13 @@ int main(int argc, char* argv[]) {
 
     QFont applicationFont = application.font();
     applicationFont.setFamilies({
-        QStringLiteral("Helvetica Neue"),
+        QStringLiteral("Kaiti SC"),
+        QStringLiteral("STKaiti"),
+        QStringLiteral("KaiTi"),
+        QStringLiteral("Kaiti TC"),
+        QStringLiteral("Songti SC"),
+        QStringLiteral("Noto Serif CJK SC"),
         QStringLiteral("PingFang SC"),
-        QStringLiteral("Noto Sans CJK SC"),
-        QStringLiteral("Segoe UI"),
     });
     applicationFont.setPointSize(12);
     application.setFont(applicationFont);

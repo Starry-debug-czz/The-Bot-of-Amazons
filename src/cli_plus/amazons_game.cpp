@@ -231,13 +231,14 @@ AmazonsGame::AmazonsGame() {
 void AmazonsGame::reset() {
     board_.fill(Empty);
 
+    // 开局:上四枚黑子,下四枚白子(黑仍先行)
     for (const Coord coord : std::array<Coord, 4>{{
-             {0, 2}, {2, 0}, {5, 0}, {7, 2},
+             {0, 2}, {0, 5}, {2, 0}, {2, 7},
          }}) {
         board_[indexOf(coord)] = Black;
     }
     for (const Coord coord : std::array<Coord, 4>{{
-             {0, 5}, {2, 7}, {5, 7}, {7, 5},
+             {5, 0}, {5, 7}, {7, 2}, {7, 5},
          }}) {
         board_[indexOf(coord)] = White;
     }

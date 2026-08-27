@@ -5,12 +5,14 @@
 #include <QtConcurrent/QtConcurrentRun>
 
 #include <QComboBox>
+#include <QDialog>
 #include <QFrame>
 #include <QGraphicsDropShadowEffect>
+#include <QGraphicsOpacityEffect>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QListWidget>
-#include <QMessageBox>
+#include <QPropertyAnimation>
 #include <QPushButton>
 #include <QScrollBar>
 #include <QShortcut>
@@ -27,8 +29,8 @@ QString playerName(int player) {
     return player == Black ? QStringLiteral("黑方") : QStringLiteral("白方");
 }
 
-QString playerEnglishName(int player) {
-    return player == Black ? QStringLiteral("BLACK") : QStringLiteral("WHITE");
+QString playerMark(int player) {
+    return player == Black ? QStringLiteral("黑") : QStringLiteral("白");
 }
 
 void refreshStyle(QWidget* widget) {
@@ -53,7 +55,7 @@ MainWindow::MainWindow(QWidget* parent)
 }
 
 void MainWindow::buildInterface() {
-    setWindowTitle(QStringLiteral("ZZmazon · Amazons Studio"));
+    setWindowTitle(QStringLiteral("ZZmazon · 弈棋斋 · 亚马逊棋"));
     resize(1320, 850);
     setMinimumSize(1060, 700);
 
@@ -80,9 +82,9 @@ void MainWindow::buildInterface() {
     auto* brandLayout = new QVBoxLayout(brandBlock);
     brandLayout->setContentsMargins(0, 0, 0, 0);
     brandLayout->setSpacing(1);
-    auto* eyebrow = new QLabel(QStringLiteral("GAME OF THE AMAZONS"), brandBlock);
+    auto* eyebrow = new QLabel(QStringLiteral("GAME OF THE AMAZONS · 弈"), brandBlock);
     eyebrow->setObjectName(QStringLiteral("eyebrow"));
-    auto* brand = new QLabel(QStringLiteral("ZZmazon Studio"), brandBlock);
+    auto* brand = new QLabel(QStringLiteral("ZZmazon 弈棋斋"), brandBlock);
     brand->setObjectName(QStringLiteral("brandTitle"));
     brandLayout->addWidget(eyebrow);
     brandLayout->addWidget(brand);
@@ -135,15 +137,15 @@ void MainWindow::buildInterface() {
 
     sideLayout->addWidget(makeSectionLabel(QStringLiteral("对局设置"), sidebar));
     modeCombo_ = new QComboBox(sidebar);
-    modeCombo_->addItem(QStringLiteral("人机对战"), true);
-    modeCombo_->addItem(QStringLiteral("本地双人"), false);
+    modeCombo_->addItem(QStringLiteral("人机对弈"), true);
+    modeCombo_->addItem(QStringLiteral("双人对弈"), false);
     sideCombo_ = new QComboBox(sidebar);
-    sideCombo_->addItem(QStringLiteral("我执黑 · 先手"), Black);
-    sideCombo_->addItem(QStringLiteral("我执白 · 后手"), White);
+    sideCombo_->addItem(QStringLiteral("吾执黑子 · 先行"), Black);
+    sideCombo_->addItem(QStringLiteral("吾执白子 · 后行"), White);
     difficultyCombo_ = new QComboBox(sidebar);
-    difficultyCombo_->addItem(QStringLiteral("轻快 · 350 ms"), 350);
-    difficultyCombo_->addItem(QStringLiteral("均衡 · 800 ms"), 800);
-    difficultyCombo_->addItem(QStringLiteral("深入 · 1500 ms"), 1500);
+    difficultyCombo_->addItem(QStringLiteral("初窥门径 · 350ms"), 350);
+    difficultyCombo_->addItem(QStringLiteral("渐入佳境 · 800ms"), 800);
+    difficultyCombo_->addItem(QStringLiteral("登峰造极 · 1500ms"), 1500);
     difficultyCombo_->setCurrentIndex(1);
     sideLayout->addWidget(modeCombo_);
     sideLayout->addWidget(sideCombo_);
@@ -156,7 +158,7 @@ void MainWindow::buildInterface() {
     newGameButton_ = new QPushButton(QStringLiteral("新对局"), actionRow);
     newGameButton_->setObjectName(QStringLiteral("primaryButton"));
     undoButton_ = new QPushButton(QStringLiteral("悔棋"), actionRow);
-    hintButton_ = new QPushButton(QStringLiteral("提示"), actionRow);
+    hintButton_ = new QPushButton(QStringLiteral("锦囊"), actionRow);
     actionLayout->addWidget(newGameButton_, 2);
     actionLayout->addWidget(undoButton_, 1);
     actionLayout->addWidget(hintButton_, 1);
@@ -165,8 +167,8 @@ void MainWindow::buildInterface() {
     auto* logHeader = new QWidget(sidebar);
     auto* logHeaderLayout = new QHBoxLayout(logHeader);
     logHeaderLayout->setContentsMargins(0, 4, 0, 0);
-    auto* logTitle = makeSectionLabel(QStringLiteral("走子记录"), sidebar);
-    moveCountLabel_ = new QLabel(QStringLiteral("0 PLY"), sidebar);
+    auto* logTitle = makeSectionLabel(QStringLiteral("手谈实录"), sidebar);
+    moveCountLabel_ = new QLabel(QStringLiteral("共 0 手"), sidebar);
     moveCountLabel_->setObjectName(QStringLiteral("counterLabel"));
     logHeaderLayout->addWidget(logTitle);
     logHeaderLayout->addStretch();
@@ -181,8 +183,8 @@ void MainWindow::buildInterface() {
 
     auto* help = new QLabel(
         QStringLiteral(
-            "操作：点击棋子 → 点击终点 → 点击箭点\n"
-            "右键或 Esc 可取消当前选择"
+            "先点一子定去向，再点空处移玉步，\n"
+            "末点一处降朱障。右键或 Esc 收回成命。"
         ),
         sidebar
     );
@@ -298,7 +300,7 @@ void MainWindow::handleMoveChosen(const Move& move) {
     }
 
     appendMoveToLog(movingPlayer, move);
-    setBusy(true, QStringLiteral("落子动画进行中"));
+    setBusy(true, QStringLiteral("落子进行中…"));
     boardWidget_->animateArrow(move);
     updateInterface();
 }
@@ -313,10 +315,10 @@ void MainWindow::handleAnimationFinished() {
     if (versusAi_ && !isHumanTurn()) {
         QTimer::singleShot(180, this, &MainWindow::startAiTurn);
     } else {
-        statusTitle_->setText(QStringLiteral("%1行动").arg(
+        statusTitle_->setText(QStringLiteral("轮到%1").arg(
             playerName(game_.currentPlayer())
         ));
-        statusDetail_->setText(QStringLiteral("选择棋子，光轨会展示所有合法方向。"));
+        statusDetail_->setText(QStringLiteral("点选己方棋子，青色墨点皆为可行之处。"));
         boardWidget_->setInputEnabled(true);
     }
 }
@@ -331,10 +333,10 @@ void MainWindow::startAiTurn() {
     const int thinkTime = selectedThinkTime();
     setBusy(
         true,
-        QStringLiteral("AI 正在评估领地、机动性与对手回应…")
+        QStringLiteral("AI 运筹帷幄，推演领地与杀势…")
     );
-    statusTitle_->setText(QStringLiteral("ZZmazon 思考中"));
-    phaseLabel_->setText(QStringLiteral("SEARCHING · %1 MS").arg(thinkTime));
+    statusTitle_->setText(QStringLiteral("AI 沉思中"));
+    phaseLabel_->setText(QStringLiteral("运筹 · %1 毫秒").arg(thinkTime));
 
     aiWatcher_.setFuture(QtConcurrent::run([board, player, thinkTime] {
         return AmazonsGame::chooseMove(board, player, thinkTime);
@@ -360,7 +362,7 @@ void MainWindow::finishAiTurn() {
     }
 
     appendMoveToLog(movingPlayer, *move);
-    setBusy(true, QStringLiteral("ZZmazon 已落子"));
+    setBusy(true, QStringLiteral("AI 已落子"));
     boardWidget_->animateMove(*move);
     updateInterface();
 }
@@ -392,9 +394,9 @@ void MainWindow::requestHint() {
     const auto board = game_.board();
     const int player = game_.currentPlayer();
     const int thinkTime = std::min(520, selectedThinkTime());
-    setBusy(true, QStringLiteral("正在生成局面提示…"));
-    statusTitle_->setText(QStringLiteral("分析当前局面"));
-    phaseLabel_->setText(QStringLiteral("CALCULATING HINT"));
+    setBusy(true, QStringLiteral("推演当前局面…"));
+    statusTitle_->setText(QStringLiteral("锦囊推演中"));
+    phaseLabel_->setText(QStringLiteral("推演中…"));
 
     hintWatcher_.setFuture(QtConcurrent::run([board, player, thinkTime] {
         return AmazonsGame::chooseMove(board, player, thinkTime);
@@ -406,11 +408,11 @@ void MainWindow::finishHint() {
     const std::optional<Move> move = hintWatcher_.result();
     if (move) {
         boardWidget_->showHint(*move);
-        statusTitle_->setText(QStringLiteral("建议路线已标出"));
+        statusTitle_->setText(QStringLiteral("锦囊已开"));
         statusDetail_->setText(QString::fromStdString(
             AmazonsGame::formatMove(*move)
         ));
-        phaseLabel_->setText(QStringLiteral("金色虚线为建议路线"));
+        phaseLabel_->setText(QStringLiteral("赭金虚线乃推荐着法"));
     }
     updateInterface();
 }
@@ -418,14 +420,14 @@ void MainWindow::finishHint() {
 void MainWindow::updateInterface() {
     const int turn = game_.currentPlayer();
     turnBadge_->setText(
-        QStringLiteral("%1  %2 TO MOVE")
+        QStringLiteral("%1 %2 行棋")
             .arg(turn == Black ? QStringLiteral("●") : QStringLiteral("○"),
-                 playerEnglishName(turn))
+                 playerName(turn))
     );
     turnBadge_->setProperty("side", turn == Black ? "black" : "white");
     refreshStyle(turnBadge_);
 
-    moveCountLabel_->setText(QStringLiteral("%1 PLY").arg(game_.moveCount()));
+    moveCountLabel_->setText(QStringLiteral("共 %1 手").arg(game_.moveCount()));
     const bool humanTurn = isHumanTurn();
     const bool controlsLocked = busy_ || boardTransition_;
     boardWidget_->setInputEnabled(!controlsLocked && humanTurn);
@@ -458,9 +460,9 @@ void MainWindow::setBusy(bool busy, const QString& message) {
 void MainWindow::appendMoveToLog(int player, const Move& move) {
     const int ply = game_.moveCount();
     auto* item = new QListWidgetItem(
-        QStringLiteral("%1  %2  %3")
+        QStringLiteral("%1  %2 · %3")
             .arg(ply, 2, 10, QLatin1Char('0'))
-            .arg(player == Black ? QStringLiteral("●") : QStringLiteral("○"))
+            .arg(playerMark(player))
             .arg(QString::fromStdString(AmazonsGame::formatMove(move))),
         moveLog_
     );
@@ -483,16 +485,130 @@ bool MainWindow::checkGameOver() {
     boardWidget_->setInputEnabled(false);
     statusTitle_->setText(QStringLiteral("%1获胜").arg(playerName(winningPlayer)));
     statusDetail_->setText(QStringLiteral("对手已没有任何合法移动。"));
-    phaseLabel_->setText(QStringLiteral("GAME COMPLETE"));
+    phaseLabel_->setText(QStringLiteral("此局终了"));
 
-    QMessageBox message(this);
-    message.setWindowTitle(QStringLiteral("对局结束"));
-    message.setIcon(QMessageBox::NoIcon);
-    message.setText(QStringLiteral("%1获胜").arg(playerName(winningPlayer)));
-    message.setInformativeText(QStringLiteral("对手已无合法走法。可以悔棋复盘，或开启新对局。"));
-    message.setStandardButtons(QMessageBox::Ok);
-    message.exec();
+    showGameOverDialog(winningPlayer);
     return true;
+}
+
+void MainWindow::showGameOverDialog(int winningPlayer) {
+    QDialog dialog(this);
+    dialog.setModal(true);
+    dialog.setFixedSize(396, 432);
+    dialog.setAttribute(Qt::WA_TranslucentBackground);
+    dialog.setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint);
+
+    // QFrame 才能可靠承载样式表背景(纯 QDialog 在部分平台不绘背景)
+    auto* card = new QFrame(&dialog);
+    card->setObjectName(QStringLiteral("gameOverCard"));
+
+    const bool humanWon = !versusAi_ || winningPlayer == humanColor_;
+
+    auto* outerLayout = new QVBoxLayout(&dialog);
+    outerLayout->setContentsMargins(0, 0, 0, 0);
+    outerLayout->addWidget(card);
+    auto* layout = new QVBoxLayout(card);
+    layout->setContentsMargins(32, 34, 32, 26);
+    layout->setSpacing(7);
+
+    // 朱印:胜局钤朱砂,负局钤焦墨
+    auto* seal = new QLabel(humanWon ? QStringLiteral("胜") : QStringLiteral("负"),
+                            &dialog);
+    seal->setObjectName(QStringLiteral("gameOverSeal"));
+    seal->setProperty("result", humanWon ? QStringLiteral("win")
+                                         : QStringLiteral("loss"));
+    seal->setAlignment(Qt::AlignCenter);
+    seal->setFixedSize(112, 112);
+    refreshStyle(seal);
+    layout->addWidget(seal, 0, Qt::AlignHCenter);
+
+    auto* title = new QLabel(&dialog);
+    title->setObjectName(QStringLiteral("gameOverTitle"));
+    title->setAlignment(Qt::AlignCenter);
+    title->setText(
+        versusAi_
+            ? (humanWon ? QStringLiteral("棋高一着，妙手功成")
+                        : QStringLiteral("惜败半筹，再战可期"))
+            : QStringLiteral("%1获胜").arg(playerName(winningPlayer))
+    );
+
+    auto* subtitle = new QLabel(&dialog);
+    subtitle->setObjectName(QStringLiteral("gameOverSubtitle"));
+    subtitle->setAlignment(Qt::AlignCenter);
+    subtitle->setText(QStringLiteral("%1 · 共 %2 手")
+                          .arg(playerName(winningPlayer))
+                          .arg(game_.moveCount()));
+
+    auto* detail = new QLabel(&dialog);
+    detail->setObjectName(QStringLiteral("gameOverDetail"));
+    detail->setAlignment(Qt::AlignCenter);
+    detail->setText(QStringLiteral("对手已无合法着法。可悔棋复盘，或另开新局。"));
+
+    auto* divider = new QFrame(&dialog);
+    divider->setObjectName(QStringLiteral("gameOverDivider"));
+    divider->setFrameShape(QFrame::HLine);
+
+    layout->addWidget(title);
+    layout->addWidget(subtitle);
+    layout->addWidget(detail);
+    layout->addSpacing(6);
+    layout->addWidget(divider);
+    layout->addStretch();
+
+    auto* buttons = new QHBoxLayout();
+    buttons->setSpacing(10);
+    auto* againButton = new QPushButton(QStringLiteral("再来一局"), &dialog);
+    againButton->setObjectName(QStringLiteral("primaryButton"));
+    auto* undoButton = new QPushButton(QStringLiteral("悔棋复盘"), &dialog);
+    auto* closeButton = new QPushButton(QStringLiteral("关 闭"), &dialog);
+    buttons->addWidget(againButton, 2);
+    buttons->addWidget(undoButton, 1);
+    buttons->addWidget(closeButton, 1);
+    layout->addLayout(buttons);
+
+    const int kUndoResult = QDialog::Accepted + 1;
+    connect(againButton, &QPushButton::clicked, &dialog,
+            [&dialog] { dialog.done(QDialog::Accepted); });
+    connect(undoButton, &QPushButton::clicked, &dialog,
+            [&dialog] { dialog.done(kUndoResult); });
+    connect(closeButton, &QPushButton::clicked, &dialog, &QDialog::reject);
+
+    // 入场:卡片淡入,朱印自上而落
+    auto* sealEffect = new QGraphicsOpacityEffect(seal);
+    sealEffect->setOpacity(0.0);
+    seal->setGraphicsEffect(sealEffect);
+    auto* sealFade = new QPropertyAnimation(sealEffect, "opacity");
+    sealFade->setDuration(300);
+    sealFade->setStartValue(0.0);
+    sealFade->setEndValue(1.0);
+    sealFade->setEasingCurve(QEasingCurve::OutCubic);
+    sealFade->start(QAbstractAnimation::DeleteWhenStopped);
+
+    dialog.setWindowOpacity(0.0);
+    dialog.show();
+    auto* cardFade = new QPropertyAnimation(&dialog, "windowOpacity");
+    cardFade->setDuration(240);
+    cardFade->setStartValue(0.0);
+    cardFade->setEndValue(1.0);
+    cardFade->setEasingCurve(QEasingCurve::OutCubic);
+    cardFade->start(QAbstractAnimation::DeleteWhenStopped);
+
+    const QPoint sealHome = seal->pos();
+    seal->move(sealHome - QPoint(0, 30));
+    auto* stampDrop = new QPropertyAnimation(seal, "pos");
+    stampDrop->setDuration(300);
+    stampDrop->setStartValue(seal->pos());
+    stampDrop->setEndValue(sealHome);
+    stampDrop->setEasingCurve(QEasingCurve::InQuad);
+    stampDrop->start(QAbstractAnimation::DeleteWhenStopped);
+
+    dialog.exec();
+
+    if (dialog.result() == QDialog::Accepted) {
+        startNewGame();
+    } else if (dialog.result() == kUndoResult) {
+        undoMove();
+    }
 }
 
 bool MainWindow::isHumanTurn() const {

@@ -35,6 +35,7 @@ private:
     void buildInterface();
     void connectInterface();
     void startAiTurn();
+    void showGameOverDialog(int winningPlayer);
     void updateInterface();
     void setBusy(bool busy, const QString& message = {});
     void appendMoveToLog(int player, const Move& move);
